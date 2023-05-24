@@ -2,47 +2,101 @@
 {% extends "base.html" %}
 
 {% block content %}
-	<br>
-
+<br>
 	<center>
 	<form action="/submit" id="textform" method="post">
-	    <textarea name="content" rows="4" cols="50" placeholder="Just write whatever you want to..."></textarea>
+	    <div class="input-container">
+			<input type="text" name="content" placeholder="Tu Mensaje" >
+		</div>
 	    <br>
-	    <input type="text" name="author" placeholder="Your name">
-	    <input type="submit" value="Post">
+		<div class="input-container">
+			<input type="text" name="author" placeholder="Tu nombre" >
+		</div>
+		<br>
+		<br>
+		
+	    <input type="submit" class="button" value="Post">
 	</form>
 	</center>
 
 	<br>
 
-	<a href="{{node_address}}/mine" target="_blank"><button>Request to mine</button></a>
-	<a href="/"><button>Resync</button></a>
-
+	<a href="{{node_address}}/mine" target="_blank"><button class="button">Minar</button></a>
+	<a href="/"><button class="button">Resync</button></a>
+		
 	<div style="margin: 20px;">
-
+	<div class="post">
     {% for post in posts %}
     <div class="post_box">
 	   <div class="post_box-header">
-	      <div class="post_box-options"><button class="option-btn">Reply</button></div>
 	      <div style="background: rgb(0, 97, 146) none repeat scroll 0% 0%; box-shadow: rgb(0, 97, 146) 0px 0px 0px 2px;" class="post_box-avatar">{{post.author[0]}}</div>
-	      <div class="name-header">{{post.author}}</div>
-	      <div class="post_box-subtitle"> Posted at <i>{{readable_time(post.timestamp)}}</i></div>
+	      <div class="name-header"> De: {{post.author}}</div>
+	      <div class="post_box-subtitle"> Publicado a las:  <i>{{readable_time(post.timestamp)}}</i> <p>Public del post: {{post.public}}</p></div>
 	   </div>
 	   <div>
 	      <div class="post_box-body">
-	         <p>{{post.content}}</p>
+	         <p class="text">{{post.content}}</p>
 	      </div>
 	   </div>
 	</div>
 	{% endfor %}
-
+</div>
+    
 	<style>
+		@keyframes flicker2 {
+		0% { box-shadow:0 20px 50px rgba(0, 0, 0, 0.8);}
+		25% { box-shadow:0 20px 50px rgba(0, 0, 255, 0.8);}
+		50% { box-shadow:0 20px 50px rgba(0, 255, 0, 0.8);}
+		75% { box-shadow:0 20px 50px rgba(255, 0, 0, 0.8);}
+		100% { box-shadow:0 20px 50px rgba(100, 100, 100, 0.8);}}
+		.button {
+			display: inline-block;
+			background-color: #2196F3;
+			border: none;
+			color: #FFFFFF;
+			text-align: center;
+			font-size: 16px;
+			padding: 10px;
+			width: 120px;
+			transition: all 0.5s;
+			cursor: pointer;
+			margin: 5px;
+			border-radius: 10px;
+		    box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.4);
+			}
+
+		.button span {
+			cursor: pointer;
+			display: inline-block;
+			position: relative;
+			transition: 0.5s;
+			}
+
+		.button span:after {
+			content: '\00bb';
+			position: absolute;
+			opacity: 0;
+			top: 0;
+			right: -20px;
+			transition: 0.5s;
+			}
+
+		.button:hover span {
+			padding-right: 25px;
+			}
+
+		.button:hover span:after {
+			opacity: 1;
+			right: 0;
+			}
+
 		.post_box {
 		    background: #fff;
-		    padding: 12px 0px 0px 12px;
-		    margin-top: 0px;
-		    margin-bottom: 8px;
+		    padding: 12px 20px 20px 12px;
+		    margin: 12px;
 		    border-top: 1px solid #f0f0f0;
+			border-radius: 10px;
+		    box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.4);
 		}
 
 		.post_box-header {
@@ -74,29 +128,90 @@
 		}
 
 		.post_box-subtitle {
-		    color: #777;
+		    color: #242424;
+			.p{
+				max-width: 1px;
+				
+				color: #020202;
+			}
 		}
 
 		.post_box-body {
-		    margin-top: 16px;
-		    margin-bottom: 8px;
+		    margin : 10px;
+			margin-top: 0;
+			background: #8a8a8a;
+			height: 100px;
+			border-radius: 10px;
+		    box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.4);
+			.text{
+				margin: 10px;
+			}
 		}
 
 		.post_box-options {
 		    float: right;
 		}
-		.option-btn {
-		    background: #f8f8f8;
-		    border: none;
-		    color: #2c3e50;
-		    padding: 7px;
-		    cursor: pointer;
-		    font-size: 14px;
-		    margin-left: 2px;
-		    margin-right: 2px;
-		    outline: none;
-		    height: 42px;
+		.input-container {
+		position: relative;
+		margin-bottom: 20px;
+		max-width: 200px;
+		color: #FFFFFF;
 		}
+
+		.input-container input {
+		border: none;
+		color: #FFFFFF;
+		border-bottom: 1px solid #FFFFFF;;
+		outline: none;
+		font-size: 16px;
+		padding: 10px 0;
+		width: 100%;
+		background-color: transparent;
+		}
+
+		.input-container input:focus {
+		border-bottom: 2px solid #21f391;
+		}
+		.post{
+			display: grid;
+		}
+		.input-container label {
+		position: absolute;
+		top: 0;
+		left: 0;
+		font-size: 16px;
+		padding: 10px 0;
+		transition: all 0.3s;
+		pointer-events: none;
+		color: #FFFFFF;
+		}
+
+		.input-container input:focus ~ label,
+		.input-container input:valid ~ label {
+		top: -20px;
+		font-size: 12px;
+		color: #FFFFFF;
+		}
+		/*  Fin  */
+		@media only screen and (max-width: 900px) {
+		.post{
+			grid-template-columns: repeat(1,100%);
+			box-shadow: 0 0px 50px rgba(0, 0, 0, 0.8);
+		}
+		}
+		@media only screen and (min-width:901px){
+		.post{
+			grid-template-columns: repeat(3,33%);
+			box-shadow: 0 20px 50px rgba(0, 0, 0, 0.8);
+		}
+		.post_box:hover {
+		transform: scale(1.2);
+		transition: 1s;
+		animation: flicker2 1s infinite;
+
+		}
+		}
+
 	</style>
     </div>
 {% endblock %}

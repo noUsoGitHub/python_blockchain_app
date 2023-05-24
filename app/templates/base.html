@@ -3,8 +3,11 @@
     <title>{{ title }}</title>
   </head>
   <body>
-    <div><a href="/index">Home</a></div>
-    <center><h1>{{ title }}</h1></center>
+  <center class="header">
+    <div class="title">
+      <h1>{{ title }}</h1>
+    </div>
+  </center>
     <hr>
     {% with messages = get_flashed_messages() %}
     {% if messages %}
@@ -16,5 +19,20 @@
     {% endif %}
     {% endwith %}
     {% block content %}{% endblock %}
+    <style>
+      :root{
+        background: #282829;
+      }
+      .title {
+        display: inline-block;
+        color: #FFFFFF;
+        text-align: center;
+        font-size: 16px;
+        padding: 10px;
+        width: 100vh;
+        transition: all 0.5s;
+        margin: 5px; 
+        }
+    </style>
   </body>
 </html>

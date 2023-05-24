@@ -1,3 +1,4 @@
+import base64
 import os
 import sys
 import signal
@@ -5,9 +6,12 @@ import atexit
 from hashlib import sha256
 import json
 import time
-
+import binascii
 from flask import Flask, request
 import requests
+
+from cryptography.hazmat.primitives import hashes,serialization
+from cryptography.hazmat.primitives.asymmetric import padding
 
 
 class Block:
@@ -38,11 +42,6 @@ class Blockchain:
             self.create_genesis_block()
 
     def create_genesis_block(self):
-        """
-        A function to generate genesis block and appends it to
-        the chain. The block has index 0, previous_hash as 0, and
-        a valid hash.
-        """
         genesis_block = Block(0, [], 0, "0")
         genesis_block.hash = genesis_block.compute_hash()
         self.chain.append(genesis_block)
@@ -52,17 +51,11 @@ class Blockchain:
         return self.chain[-1]
 
     def add_block(self, block, proof):
-        """
-        A function that adds the block to the chain after verification.
-        Verification includes:
-        * Checking if the proof is valid.
-        * The previous_hash referred in the block and the hash of latest block
-          in the chain match.
-        """
+        
         previous_hash = self.last_block.hash
 
         if previous_hash != block.previous_hash:
-            raise ValueError("Previous hash incorrect")
+            raise ValueError("Hash  Invalido")
 
         if not Blockchain.is_valid_proof(block, proof):
             raise ValueError("Block proof invalid")
@@ -112,7 +105,16 @@ class Blockchain:
                     previous_hash != block.previous_hash:
                 result = False
                 break
-
+            for transaction in block.transactions:
+                transaction_content = transaction['content']  # Obtener el contenido de la transacción
+                signature = transaction['pass']
+                public_key = transaction['public'] 
+                if not verify_signature(public_key, transaction_content.encode(), signature):
+                    result = False
+                    break
+                if not result:
+                    break
+ 
             block.hash, previous_hash = block_hash, block_hash
 
         return result
@@ -191,6 +193,7 @@ def create_chain_from_dump(chain_dump):
 # all the posts to display.
 @app.route('/chain', methods=['GET'])
 def get_chain():
+    print("Getting chain")
     chain_data = []
     for block in blockchain.chain:
         chain_data.append(block.__dict__)
@@ -235,6 +238,26 @@ else:
 # endpoint to request the node to mine the unconfirmed
 # transactions (if any). We'll be using it to initiate
 # a command to mine from our application itself.
+
+
+def verify_signature(public_base64, message, signature_hex):
+    try:
+        public_bytes = base64.b64decode(public_base64)
+        public_key = serialization.load_der_public_key(public_bytes)
+        signature = binascii.unhexlify(signature_hex)
+        public_key.verify(
+            signature,
+            message,
+            padding.PSS(
+                mgf=padding.MGF1(hashes.SHA256()),
+                salt_length=padding.PSS.MAX_LENGTH
+            ),
+            hashes.SHA256()
+        )
+        return True
+    except Exception:
+        return None
+    
 @app.route('/mine', methods=['GET'])
 def mine_unconfirmed_transactions():
     result = blockchain.mine()
@@ -246,8 +269,11 @@ def mine_unconfirmed_transactions():
         consensus()
         if chain_length == len(blockchain.chain):
             # announce the recently mined block to the network
-            announce_new_block(blockchain.last_block)
-        return "Block #{} is mined.".format(blockchain.last_block.index)
+            
+                announce_new_block(blockchain.last_block)
+                return "Bloque numero {} minado.".format(blockchain.last_block.index)
+        else:
+                return "El Bloque numero {} No se añade!!!!.".format(blockchain.last_block.index)
 
 
 # endpoint to add new peers to the network.
