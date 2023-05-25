@@ -9,21 +9,14 @@ from cryptography.hazmat.primitives.asymmetric import padding
 from cryptography.hazmat.primitives import serialization
 import requests
 from flask import render_template, redirect, request , url_for
-
 from app import app
-
-# The node with which our application interacts, there can be multiple
-# such nodes as well.
-CONNECTED_NODE_ADDRESS = "http://127.0.0.1:8000"
+port ="8002"
+CONNECTED_NODE_ADDRESS = "http://127.0.0.1:"+port
 
 posts = []
 
 
 def fetch_posts():
-    """
-    Function to fetch the chain from a blockchain node, parse the
-    data and store it locally.
-    """
     get_chain_address = "{}/chain".format(CONNECTED_NODE_ADDRESS)
     response = requests.get(get_chain_address)
     if response.status_code == 200:
@@ -53,13 +46,9 @@ def index():
 
 @app.route('/submit', methods=['POST'])
 def submit_textarea():
-    """
-    Endpoint to create a new transaction via our application.
-    """
     post_content = request.form["content"]
-    author = request.form["author"]
 
-    private_key, public_key = generate_key_pair(author)
+    private_key, public_key = generate_key_pair(port)
 
     signature = sign_message(private_key, post_content.encode())
     public_bytes = public_key.public_bytes(
@@ -69,8 +58,7 @@ def submit_textarea():
     public_pem = base64.b64encode(public_bytes).decode()
     if verify_signature(public_pem, post_content.encode(), signature):
         
-        
-        # Submit a transaction
+        author=port
         post_object = {
             'author': author,
             'pass': signature,
@@ -90,7 +78,6 @@ def submit_textarea():
 
 @app.route('/dialog/<author>')
 def dialog(author):
-    # Generar el HTML del diálogo
     dialog_html = "<h1>Notificación para {}</h1>".format(author)
     dialog_html += "<ul>"
     dialog_html += "<li>Tu mensaje fue enviado a la cadena</li>"
